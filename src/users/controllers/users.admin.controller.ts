@@ -1,10 +1,11 @@
-import { Controller, Get, Param, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UsersAdminService } from '../services/users.admin.service';
 import { PaginationValidation } from 'src/Util/pipes/pagination-validation.pipe';
 import { UserInterceptor } from '../interceptors/users.interceptor';
 import { AuthGuardIsAdmin } from 'src/auth/guards/auth.isAdmin.guard';
 import { Request } from 'express';
 import { authPayload } from 'src/auth/auth.service';
+import { UpdateProfileDto } from 'src/profiles/dto/update.profile.dto';
 
 
 
@@ -57,5 +58,14 @@ export class UsersAdminController {
     return this.usersAdminService.getProfile(userPayload)
   }
 
-
+  @UseGuards(AuthGuardIsAdmin)
+  @Patch('profile')
+  @UseInterceptors(UserInterceptor)
+  editProfile(
+    @Body() updateProfileDto: UpdateProfileDto,
+    @Req() request: Request,
+  ) {
+    const userPayload: authPayload = request['user']
+    return this.usersAdminService.updateProfile(userPayload, updateProfileDto)
+  }
 }

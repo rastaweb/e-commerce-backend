@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { RolesModule } from './roles/roles.module';
 import { Role } from './roles/entities/role.entity';
 import { RolesService } from './roles/services/roles.service';
+import { ProductsModule } from './products/products.module';
 
 const typeOrm = TypeOrmModule.forRoot({
   type: 'mysql',
@@ -30,6 +31,7 @@ const typeOrm = TypeOrmModule.forRoot({
     ProfilesModule,
     AuthModule,
     RolesModule,
+    ProductsModule,
   ],
   controllers: [],
   providers: [],
@@ -47,4 +49,5 @@ export class AppModule {
   }
 
 }
+
 

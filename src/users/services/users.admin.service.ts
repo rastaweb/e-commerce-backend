@@ -7,12 +7,15 @@ import { UsersService } from './users.service';
 import { RolesService } from 'src/roles/services/roles.service';
 import { rolesEnum } from 'src/Util/enums/rolesEnum';
 import { authPayload } from 'src/auth/auth.service';
+import { UpdateProfileDto } from 'src/profiles/dto/update.profile.dto';
+import { ProfilesService } from 'src/profiles/services/profiles.service';
 @Injectable()
 export class UsersAdminService {
     constructor(
         @InjectRepository(User) private readonly usersRepository: Repository<User>,
         private readonly usersService: UsersService,
         private readonly rolesService: RolesService,
+        private readonly profilesService: ProfilesService,
     ) { }
 
     async findAll(page: number, limit: number) {
@@ -60,7 +63,6 @@ export class UsersAdminService {
     }
 
 
-
     async getProfile(userPayload: authPayload) {
         const { mobile } = userPayload
         const user = await this.usersRepository.findOne({ where: { mobile }, relations: { profile: true, role: true } })
@@ -68,6 +70,11 @@ export class UsersAdminService {
         return user
     }
 
+    async updateProfile(userPayload: authPayload, updateProfileDto: UpdateProfileDto) {
+        await this.profilesService.update(userPayload.sub, updateProfileDto)
+        const user = this.findByMobile(userPayload.mobile)
+        return user
+    }
 
     // * Iitialize section
     async _init_() {

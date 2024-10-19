@@ -29,6 +29,5 @@ export class User {
     profile: Profile
 
     @ManyToOne(() => Role, (role) => role.users)
-    @Exclude()
     role: Role
 }

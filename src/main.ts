@@ -6,10 +6,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,  // فیلدهای اضافی از داده‌ها حذف می‌شوند
-      forbidNonWhitelisted: true,  // ارسال فیلدهای غیرمجاز باعث خطا می‌شود
+      whitelist: true,
+      forbidNonWhitelisted: true,
       exceptionFactory: (errors) => {
-        console.log(errors);
+
 
         // جستجوی خطای مرتبط با whitelist
         const whiteListError = errors.find(item => {

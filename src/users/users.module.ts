@@ -8,14 +8,16 @@ import { UsersAdminController } from './controllers/users.admin.controller';
 
 import { RolesService } from 'src/roles/services/roles.service';
 import { Role } from 'src/roles/entities/role.entity';
+import { ProfilesService } from 'src/profiles/services/profiles.service';
+import { Profile } from 'src/profiles/entities/profile.entity';
 
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Role])
+    TypeOrmModule.forFeature([User, Role,Profile])
   ],
   controllers: [UsersController, UsersAdminController],
-  providers: [UsersService, UsersAdminService, RolesService],
+  providers: [UsersService, UsersAdminService, RolesService,ProfilesService],
   exports: [UsersAdminService, UsersService],
 })
 export class UsersModule { }

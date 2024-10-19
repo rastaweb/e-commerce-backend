@@ -32,10 +32,10 @@ export class RolesService {
         const [, count] = await this.roleRepository.findAndCount()
         if (count) return
         try {
-            roles.forEach(role => {
+            for (const role of roles) {
                 const newRole = this.roleRepository.create(role)
-                this.roleRepository.save(newRole)
-            })
+                await this.roleRepository.save(newRole)
+            }
             // ? colored console.log for initialize
             console.log(rainbow('\n***************************'));
             console.log(rainbow('*                         *'));

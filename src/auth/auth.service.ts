@@ -18,7 +18,7 @@ export class AuthService {
 
     async signIn(loginUserDto: LoginUserDto): Promise<{ access_token: string }> {
         const { mobile, password } = loginUserDto
-        const user = await this.usersService.findByMobile(mobile);
+        const user = await this.usersService.findByMobile(mobile, { role: true });
         const isMatch = await bcrypt.compare(password, user.password)
 
         if (!isMatch) {
