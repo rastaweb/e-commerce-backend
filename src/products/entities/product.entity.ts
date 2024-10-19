@@ -1,5 +1,6 @@
 
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Category } from 'src/categories/entities/category.entity';
+import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity("products")
 export class Product {
@@ -34,11 +35,16 @@ export class Product {
     @Column({ type: 'int' })
     quantity: number
 
-    @Column({ type: 'boolean' })
+    @Column({ type: 'int', default: 0 })
     availability: number
 
     @Column({ type: 'text' })
     thumbnail: number
+
+
+    @ManyToMany(() => Category, category => category.products)
+    @JoinTable()
+    categories: Category[];
 
     // TODO => keywords
     // TODO => tags

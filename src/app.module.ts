@@ -10,6 +10,9 @@ import { RolesModule } from './roles/roles.module';
 import { Role } from './roles/entities/role.entity';
 import { RolesService } from './roles/services/roles.service';
 import { ProductsModule } from './products/products.module';
+import { Product } from './products/entities/product.entity';
+import { CategoriesModule } from './categories/categories.module';
+import { Category } from './categories/entities/category.entity';
 
 const typeOrm = TypeOrmModule.forRoot({
   type: 'mysql',
@@ -18,11 +21,9 @@ const typeOrm = TypeOrmModule.forRoot({
   username: 'root',
   password: 'm.kamran5559',
   database: 'shop',
-  entities: [User, Profile, Role],
+  entities: [User, Profile, Role, Product, Category],
   synchronize: true,
-
 })
-
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ const typeOrm = TypeOrmModule.forRoot({
     AuthModule,
     RolesModule,
     ProductsModule,
+    CategoriesModule,
   ],
   controllers: [],
   providers: [],
