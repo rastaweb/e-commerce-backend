@@ -46,6 +46,19 @@ export class CategoriesAdminService {
 
         return await this.findOneById(id)
     }
+
+
+    async validateCategories(categoryIds: number[]): Promise<Category[]> {
+        const categoryEntities = await this.categoriesRepository.findByIds(categoryIds);
+        const foundCategoryIds = categoryEntities.map(category => category.id);
+
+        const notFoundIds = categoryIds.filter(id => !foundCategoryIds.includes(id));
+        if (notFoundIds.length > 0) {
+            throw new NotFoundException(`دسته‌بندی‌های زیر یافت نشدند: ${notFoundIds.join(', ')}`);
+        }
+
+        return categoryEntities;
+    }
 }
 
 

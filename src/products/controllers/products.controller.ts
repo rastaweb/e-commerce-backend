@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ProductsService } from '../services/products.service';
 import { PaginationValidation } from 'src/Util/pipes/pagination-validation.pipe';
 import { CustomParseIntPipe } from 'src/Util/pipes/custom-parseInt.pipe';
@@ -13,9 +13,22 @@ export class ProductsController {
   findAll(
     @Query('page', new PaginationValidation({ key: "page" })) page: number = 1,
     @Query('limit', new PaginationValidation({ key: "limit", isOptional: true, defaultValue: 10 })) limit: number,
-    @Query('availability', new CustomParseIntPipe({ defaultValue: 0, isOptional: true, key: 'availability' })) availability: number,
   ) {
-    return this.productsService.findAll(page, limit, availability)
+    return this.productsService.findAll(page, limit)
+  }
+
+  @Get('/id/:id')
+  findOneById(
+    @Param('id', new CustomParseIntPipe({ key: 'id' })) id: number
+  ) {
+    return this.productsService.findOneById(id)
+  }
+
+  @Get('/slug/:slug')
+  findOneBySlug(
+    @Param('slug') slug: string
+  ) {
+    return this.productsService.findOneBySlug(slug)
   }
 
 }

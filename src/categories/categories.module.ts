@@ -12,5 +12,6 @@ import { CategoriesAdminService } from './services/categories.admin.service';
   ],
   controllers: [CategoriesController, CategoriesAdminController],
   providers: [CategoriesService, CategoriesAdminService],
+  exports: [CategoriesAdminService]
 })
 export class CategoriesModule { }

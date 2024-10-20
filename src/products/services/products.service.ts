@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../entities/product.entity';
 import { Repository } from 'typeorm';
@@ -9,11 +9,10 @@ export class ProductsService {
         @InjectRepository(Product) private readonly productsRepository: Repository<Product>
     ) { }
 
-    async findAll(page: number, limit: number, availability?: number) {
+    async findAll(page: number, limit: number) {
         const [products, total] = await this.productsRepository.findAndCount({
             skip: (page - 1) * limit,
             take: limit,
-            where: { availability: availability || 1 }
         });
 
         const totalPages = Math.ceil(total / limit);
@@ -31,6 +30,19 @@ export class ProductsService {
             nextPage: page < totalPages ? `${next}` : null,
             prevPage: page > 1 ? `${prev}` : null,
         };
+    }
+
+
+    async findOneById(id: number) {
+        const product = await this.productsRepository.findOne({ where: { id }, relations: { categories: true } })
+        if (!product) throw new NotFoundException(`محصول با آیدی ${id} یافت نشد!`)
+        return product
+    }
+
+    async findOneBySlug(slug: string) {
+        const product = await this.productsRepository.findOne({ where: { slug }, relations: { categories: true } })
+        if (!product) throw new NotFoundException(`محصول با اسلاگ ${slug} یافت نشد!`)
+        return product
     }
 
 }

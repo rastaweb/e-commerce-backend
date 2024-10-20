@@ -7,40 +7,36 @@ export class Product {
     @PrimaryGeneratedColumn({ type: 'bigint' })
     id: number
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', nullable: true })
     meta_title: string
 
-    @Column({ type: 'text' })
+    @Column({ type: 'text', nullable: true })
     meta_description: string
 
-    @Column({ type: 'varchar', length: 255, unique: true })
+    @Column({ type: 'varchar', unique: true })
     title: string
 
-    @Column({ type: 'text' })
+    @Column({ type: 'text', nullable: true })
     description: string
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', unique: true })
     slug: string
 
     @Column({ type: 'float' })
     price: number
 
-    @Column({ type: 'int' })
+    @Column({ type: 'int', default: 0 })
     discount: number
 
-    @Column({ type: 'float' })
+    @Column({ type: 'float', nullable: true })
     final_price: number
 
     // count of product
-    @Column({ type: 'int' })
+    @Column({ type: 'int', default: 0 })
     quantity: number
 
-    @Column({ type: 'int', default: 0 })
-    availability: number
-
-    @Column({ type: 'text' })
+    @Column({ type: 'text', nullable: true })
     thumbnail: number
-
 
     @ManyToMany(() => Category, category => category.products)
     @JoinTable()
