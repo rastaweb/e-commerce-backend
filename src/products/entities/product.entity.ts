@@ -25,7 +25,7 @@ export class Product {
     @Column({ type: 'float' })
     price: number
 
-    @Column({ type: 'int', default: 0 })
+    @Column({ type: 'float', default: 0 })
     discount: number
 
     @Column({ type: 'float', nullable: true })
