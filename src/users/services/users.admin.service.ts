@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { rainbow, yellow, } from 'colors';
 import { UsersService } from './users.service';
 import { RolesService } from 'src/roles/services/roles.service';
-import { rolesEnum } from 'src/Util/enums/rolesEnum';
+import { rolesEnum } from 'src/util/enums/rolesEnum';
 import { authPayload } from 'src/auth/auth.service';
 import { UpdateProfileDto } from 'src/profiles/dto/update.profile.dto';
 import { ProfilesService } from 'src/profiles/services/profiles.service';

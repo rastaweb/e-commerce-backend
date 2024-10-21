@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ProductsService } from '../services/products.service';
-import { PaginationValidation } from 'src/Util/pipes/pagination-validation.pipe';
-import { CustomParseIntPipe } from 'src/Util/pipes/custom-parseInt.pipe';
+import { PaginationValidation } from 'src/util/pipes/pagination-validation.pipe';
+import { CustomParseIntPipe } from 'src/util/pipes/custom-parseInt.pipe';
 
 @Controller('/api/products')
 export class ProductsController {

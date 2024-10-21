@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UsersAdminService } from '../services/users.admin.service';
-import { PaginationValidation } from 'src/Util/pipes/pagination-validation.pipe';
+import { PaginationValidation } from 'src/util/pipes/pagination-validation.pipe';
 import { UserInterceptor } from '../interceptors/users.interceptor';
 import { AuthGuardIsAdmin } from 'src/auth/guards/auth.isAdmin.guard';
 import { Request } from 'express';

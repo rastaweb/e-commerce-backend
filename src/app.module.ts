@@ -1,33 +1,17 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { ProfilesModule } from './profiles/profiles.module';
-import { User } from './users/entities/user.entity';
-import { Profile } from './profiles/entities/profile.entity';
 import { UsersAdminService } from './users/services/users.admin.service';
 import { AuthModule } from './auth/auth.module';
 import { RolesModule } from './roles/roles.module';
-import { Role } from './roles/entities/role.entity';
 import { RolesService } from './roles/services/roles.service';
 import { ProductsModule } from './products/products.module';
-import { Product } from './products/entities/product.entity';
 import { CategoriesModule } from './categories/categories.module';
-import { Category } from './categories/entities/category.entity';
-
-const typeOrm = TypeOrmModule.forRoot({
-  type: 'mysql',
-  host: 'localhost',
-  port: 3306,
-  username: 'root',
-  password: 'm.kamran5559',
-  database: 'shop',
-  entities: [User, Profile, Role, Product, Category],
-  synchronize: true,
-})
+import { GlobalModules } from './config/global-modules.config';
 
 @Module({
   imports: [
-    typeOrm,
+    ...GlobalModules,
     UsersModule,
     ProfilesModule,
     AuthModule,

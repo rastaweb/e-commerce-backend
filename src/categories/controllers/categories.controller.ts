@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { CategoriesService } from '../services/categories.service';
-import { CustomParseIntPipe } from 'src/Util/pipes/custom-parseInt.pipe';
+import { CustomParseIntPipe } from 'src/util/pipes/custom-parseInt.pipe';
 
 @Controller('/api/categories')
 export class CategoriesController {

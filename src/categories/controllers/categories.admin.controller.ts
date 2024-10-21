@@ -4,7 +4,7 @@ import { AuthGuardIsAdmin } from 'src/auth/guards/auth.isAdmin.guard';
 import { CategoriesAdminService } from '../services/categories.admin.service';
 import { CreateCategoryDto } from '../dto/create.category.dto';
 import { UpdateCategoryDto } from '../dto/update.category.dto';
-import { CustomParseIntPipe } from 'src/Util/pipes/custom-parseInt.pipe';
+import { CustomParseIntPipe } from 'src/util/pipes/custom-parseInt.pipe';
 
 @Controller('/api/admin/categories')
 export class CategoriesAdminController {

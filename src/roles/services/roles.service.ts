@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from '../entities/role.entity';
 import { Repository } from 'typeorm';
 import { rainbow, yellow } from 'colors';
-import { rolesEnum } from 'src/Util/enums/rolesEnum';
+import { rolesEnum } from 'src/util/enums/rolesEnum';
 
 @Injectable()
 export class RolesService {
