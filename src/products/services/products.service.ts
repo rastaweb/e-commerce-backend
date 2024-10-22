@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../entities/product.entity';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { sortEnum } from 'src/util/enums/sort.enum';
+import { ProductFiltersTypes, ProductQueryOptions } from 'src/util/filters/profucts/filter.types';
+
 
 @Injectable()
 export class ProductsService {
@@ -9,17 +12,59 @@ export class ProductsService {
         @InjectRepository(Product) private readonly productsRepository: Repository<Product>
     ) { }
 
-    async findAll(page: number, limit: number) {
+    async findAll(
+        page: number,
+        limit: number,
+        filters?: ProductFiltersTypes
+    ) {
+        const queryOptions: ProductQueryOptions = {};
+
+        if (filters?.minPrice !== undefined) {
+            queryOptions.final_price = MoreThanOrEqual(filters.minPrice);
+        }
+
+        if (filters?.maxPrice !== undefined) {
+            queryOptions.final_price = {
+                ...queryOptions.final_price,
+                ...LessThanOrEqual(filters.maxPrice)
+            };
+        }
+
+        const priceFilters: any = {};
+        if (filters?.minPrice !== undefined) {
+            priceFilters.final_price = MoreThanOrEqual(filters.minPrice);
+        }
+
+        if (filters?.maxPrice !== undefined) {
+            priceFilters.final_price = LessThanOrEqual(filters.maxPrice);
+        }
+
+        if (filters?.isAvailable !== undefined) {
+            queryOptions.quantity = filters.isAvailable ? MoreThanOrEqual(1) : 0;
+        }
+
+        if (filters?.hasDiscount !== undefined) {
+            queryOptions.discount = filters.hasDiscount ? MoreThanOrEqual(1) : 0;
+        }
+
+        if (Object.keys(priceFilters).length) {
+            queryOptions.final_price = priceFilters.final_price;
+        }
+
+        const queryOptionsLength: number = Object.keys(queryOptions).length;
+
         const [products, total] = await this.productsRepository.findAndCount({
+            where: queryOptionsLength ? queryOptions : undefined,
             skip: (page - 1) * limit,
             take: limit,
+            order: { id: filters.sort ? sortEnum[filters.sort] || 'DESC' : 'DESC' },
         });
 
         const totalPages = Math.ceil(total / limit);
-        const next = Number(page) + 1
-        let prev = Number(page) - 1
+        const next = Number(page) + 1;
+        let prev = Number(page) - 1;
 
-        if (prev > totalPages) prev = totalPages
+        if (prev > totalPages) prev = totalPages;
 
         return {
             data: products,

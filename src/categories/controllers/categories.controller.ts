@@ -15,8 +15,8 @@ export class CategoriesController {
   @Get(':id')
   findOneById(
     @Param('id', new CustomParseIntPipe({ key: 'id', })) id: number,
-    @Query('page', new PaginationValidation({ key: "page" })) page: number = 1,
-    @Query('limit', new PaginationValidation({ key: "limit", isOptional: true, defaultValue: 10 })) limit: number,
+    @Query('page', new PaginationValidation({ key: "page", isOptional: true, defaultValue: 1 })) page: number,
+    @Query('limit', new PaginationValidation({ key: "limit", isOptional: true, defaultValue: 10, max: 50 })) limit: number,
   ) {
     return this.categoriesService.findOneById(id, page, limit)
   }

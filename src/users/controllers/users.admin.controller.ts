@@ -17,8 +17,8 @@ export class UsersAdminController {
   @Get('')
   @UseInterceptors(UserInterceptor)
   findAll(
-    @Query('page', new PaginationValidation({ key: "page" })) page: number = 1,
-    @Query('limit', new PaginationValidation({ key: "limit", isOptional: true, defaultValue: 10 })) limit: number
+    @Query('page', new PaginationValidation({ key: "page", isOptional: true, defaultValue: 1 })) page: number,
+    @Query('limit', new PaginationValidation({ key: "limit", isOptional: true, defaultValue: 10, max: 50 })) limit: number,
   ) {
     return this.usersAdminService.findAll(page, limit)
   }
