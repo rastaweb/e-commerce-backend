@@ -45,4 +45,29 @@ export class ProductsService {
         return product
     }
 
+
+    async findProductsByCategory(categoryId: number, page: number, limit: number) {
+        const [products, total] = await this.productsRepository.findAndCount({
+            where: { categories: { id: categoryId } },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+
+        const totalPages = Math.ceil(total / limit);
+        const next = Number(page) + 1;
+        let prev = Number(page) - 1;
+
+        if (prev > totalPages) prev = totalPages;
+
+        return {
+            data: products,
+            total,
+            page,
+            limit,
+            totalPages,
+            nextPage: page < totalPages ? `${next}` : null,
+            prevPage: page > 1 ? `${prev}` : null,
+        };
+    }
+
 }
