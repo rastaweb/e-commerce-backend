@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../entities/product.entity';
-import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { sortEnum } from 'src/util/enums/sort.enum';
 import { ProductFiltersTypes, ProductQueryOptions } from 'src/util/filters/profucts/filter.types';
 
@@ -44,7 +44,7 @@ export class ProductsService {
         }
 
         if (filters?.hasDiscount !== undefined) {
-            queryOptions.discount = filters.hasDiscount ? MoreThanOrEqual(1) : 0;
+            queryOptions.discount = filters.hasDiscount ? MoreThan(0) : 0;
         }
 
         if (Object.keys(priceFilters).length) {

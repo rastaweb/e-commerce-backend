@@ -26,12 +26,12 @@ export class AppModule {
   constructor(
     private readonly usersAdminServise: UsersAdminService,
     private readonly rolesService: RolesService,
-
   ) { }
 
   async onModuleInit() {
     await this.rolesService.__init__()
     await this.usersAdminServise._init_()
+
   }
 
 }
