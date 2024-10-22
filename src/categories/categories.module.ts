@@ -7,13 +7,15 @@ import { CategoriesAdminController } from './controllers/categories.admin.contro
 import { CategoriesAdminService } from './services/categories.admin.service';
 import { Product } from 'src/products/entities/product.entity';
 import { ProductsService } from 'src/products/services/products.service';
+import { TagsService } from 'src/tags/services/tags.service';
+import { Tag } from 'src/tags/entities/tag.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Category, Product]),
+    TypeOrmModule.forFeature([Category, Product, Tag]),
   ],
   controllers: [CategoriesController, CategoriesAdminController],
-  providers: [CategoriesService, CategoriesAdminService, ProductsService],
+  providers: [CategoriesService, CategoriesAdminService, ProductsService, TagsService],
   exports: [CategoriesAdminService]
 })
 export class CategoriesModule { }

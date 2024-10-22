@@ -8,6 +8,7 @@ import { RolesService } from './roles/services/roles.service';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { GlobalModules } from './config/global-modules.config';
+import { TagsModule } from './tags/tags.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { GlobalModules } from './config/global-modules.config';
     RolesModule,
     ProductsModule,
     CategoriesModule,
+    TagsModule,
   ],
   controllers: [],
   providers: [],

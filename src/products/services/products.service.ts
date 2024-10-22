@@ -4,12 +4,14 @@ import { Product } from '../entities/product.entity';
 import { LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { sortEnum } from 'src/util/enums/sort.enum';
 import { ProductFiltersTypes, ProductQueryOptions } from 'src/util/filters/profucts/filter.types';
+import { TagsService } from 'src/tags/services/tags.service';
 
 
 @Injectable()
 export class ProductsService {
     constructor(
-        @InjectRepository(Product) private readonly productsRepository: Repository<Product>
+        @InjectRepository(Product) private readonly productsRepository: Repository<Product>,
+        private readonly tagsService: TagsService,
     ) { }
 
     async findAll(
@@ -77,16 +79,15 @@ export class ProductsService {
         };
     }
 
-
     async findOneById(id: number) {
         const product = await this.productsRepository.findOne({ where: { id }, relations: { categories: true } })
         if (!product) throw new NotFoundException(`محصول با آیدی ${id} یافت نشد!`)
         return product
     }
 
-    async findOneBySlug(slug: string) {
-        const product = await this.productsRepository.findOne({ where: { slug }, relations: { categories: true } })
-        if (!product) throw new NotFoundException(`محصول با اسلاگ ${slug} یافت نشد!`)
+    async findOneBySlug(slug: string, relations: Array<string> = ['categories'], error: boolean = true) {
+        const product = await this.productsRepository.findOne({ where: { slug }, relations })
+        if (error && !product) throw new NotFoundException(`محصول با اسلاگ ${slug} یافت نشد!`)
         return product
     }
 
@@ -113,6 +114,11 @@ export class ProductsService {
             nextPage: page < totalPages ? `${next}` : null,
             prevPage: page > 1 ? `${prev}` : null,
         };
+    }
+
+    async productTags(slug: string) {
+        const product = await this.findOneBySlug(slug, ['tags'])
+        return product.tags
     }
 
 }

@@ -1,5 +1,6 @@
 
 import { Category } from 'src/categories/entities/category.entity';
+import { Tag } from 'src/tags/entities/tag.entity';
 import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity("products")
@@ -42,7 +43,11 @@ export class Product {
     @JoinTable()
     categories: Category[];
 
-    // TODO => keywords
     // TODO => tags
+    @ManyToMany(() => Tag, (tag) => tag.products)
+    @JoinTable()
+    tags: Tag[];
+
+    // TODO => keywords
 }
 

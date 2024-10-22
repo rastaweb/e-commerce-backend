@@ -45,4 +45,11 @@ export class ProductsController {
     return this.productsService.findOneBySlug(slug)
   }
 
+  @Get('/slug/:slug/tags')
+  productTags(
+    @Param('slug') slug: string
+  ) {
+    return this.productsService.productTags(slug)
+  }
+
 }
