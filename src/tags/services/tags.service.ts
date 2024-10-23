@@ -42,4 +42,9 @@ export class TagsService {
         if (!tag) throw new NotFoundException('برچسب مورد نظر یافت نشد!')
         return tag
     }
+    async findOneByName(name: string) {
+        const tag = await this.tagsRepository.findOneBy({ name })
+        if (!tag) throw new NotFoundException('برچسب مورد نظر یافت نشد!')
+        return tag
+    }
 }
