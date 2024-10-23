@@ -13,6 +13,7 @@ import { UpdateProfileDto } from 'src/profiles/dto/update.profile.dto';
 export class UsersAdminController {
   constructor(private readonly usersAdminService: UsersAdminService) { }
 
+  // ? get all users
   @UseGuards(AuthGuardIsAdmin)
   @Get('')
   @UseInterceptors(UserInterceptor)
@@ -47,7 +48,7 @@ export class UsersAdminController {
     return this.usersAdminService.findByMobile(mobile)
   }
 
-
+  // ? get admin profile
   @UseGuards(AuthGuardIsAdmin)
   @Get('profile')
   @UseInterceptors(UserInterceptor)
@@ -58,6 +59,7 @@ export class UsersAdminController {
     return this.usersAdminService.getProfile(userPayload)
   }
 
+  // ? update admin profile
   @UseGuards(AuthGuardIsAdmin)
   @Patch('profile')
   @UseInterceptors(UserInterceptor)

@@ -91,7 +91,6 @@ export class ProductsService {
         return product
     }
 
-
     async findProductsByCategory(categoryId: number, page: number, limit: number) {
         const [products, total] = await this.productsRepository.findAndCount({
             where: { categories: { id: categoryId } },
@@ -120,5 +119,5 @@ export class ProductsService {
         const product = await this.findOneBySlug(slug, ['tags'])
         return product.tags
     }
-
+    
 }
