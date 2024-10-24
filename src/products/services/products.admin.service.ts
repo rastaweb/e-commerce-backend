@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../entities/product.entity';
 import { Repository } from 'typeorm';
@@ -7,6 +7,7 @@ import { CategoriesAdminService } from 'src/categories/services/categories.admin
 import { Category } from 'src/categories/entities/category.entity';
 import { TagsService } from 'src/tags/services/tags.service';
 import { stringToNumberArray } from 'src/util/converters/stringToNumberArray';
+import { ProductsService } from './products.service';
 
 @Injectable()
 export class ProductsAdminService {
@@ -14,6 +15,7 @@ export class ProductsAdminService {
         @InjectRepository(Product) private readonly productsRepository: Repository<Product>,
         private readonly categoriesAdminService: CategoriesAdminService,
         private readonly tagsService: TagsService,
+        private readonly productsService: ProductsService,
     ) { }
 
     async create(createProductDto: CreateProductDto): Promise<Product> {
@@ -53,4 +55,19 @@ export class ProductsAdminService {
 
         return await this.productsRepository.save(newProduct);
     }
+
+    async removeProductTags(slug: string, tagIds: string) {
+        const product = await this.productsService.findOneBySlug(slug, ['tags'])
+        const tags = stringToNumberArray(tagIds)
+        if (!product.tags.length) {
+            throw new NotFoundException("این محصول برچسبی ندارد!")
+        }
+        if (!product.tags.some(item => tags.includes(item.id))) {
+            throw new NotFoundException("یک یا تعدادی برچسب یاد نشد!")
+        }
+        product.tags = product.tags.filter(item => !tags.includes(item.id))
+        await this.productsRepository.save(product)
+        return product
+    }
+
 }

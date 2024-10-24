@@ -43,11 +43,11 @@ export class Product {
     @JoinTable()
     categories: Category[];
 
-    // TODO => tags
     @ManyToMany(() => Tag, (tag) => tag.products)
     @JoinTable()
     tags: Tag[];
 
     // TODO => keywords
+    // TODO => variants
 }
 

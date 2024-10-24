@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Param, Post, UseGuards } from '@nestjs/common';
 import { CreateProductDto } from '../dto/create.product.dto';
 import { ProductsAdminService } from '../services/products.admin.service';
 import { AuthGuardIsAdmin } from 'src/auth/guards/auth.isAdmin.guard';
@@ -14,4 +14,16 @@ export class ProductsAdminController {
   ) {
     return this.productsAdminService.create(createProductDto);
   }
+
+  @UseGuards(AuthGuardIsAdmin)
+  @Delete('/slug/:slug/:tags')
+  removeTags(
+    @Param('slug') slug: string,
+    @Param('tags') tags: string,
+  ) {
+    if (tags.includes(' ')) throw new BadRequestException('آیدی برچسب‌ها باید با کاما از هم جدا شوند!');
+    return this.productsAdminService.removeProductTags(slug, tags)
+  }
+
+
 }

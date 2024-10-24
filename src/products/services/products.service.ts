@@ -85,7 +85,7 @@ export class ProductsService {
         return product
     }
 
-    async findOneBySlug(slug: string, relations: Array<string> = ['categories'], error: boolean = true) {
+    async findOneBySlug(slug: string, relations: Array<string> | null = ['categories'], error: boolean = true) {
         const product = await this.productsRepository.findOne({ where: { slug }, relations })
         if (error && !product) throw new NotFoundException(`محصول با اسلاگ ${slug} یافت نشد!`)
         return product
@@ -119,5 +119,5 @@ export class ProductsService {
         const product = await this.findOneBySlug(slug, ['tags'])
         return product.tags
     }
-    
+
 }

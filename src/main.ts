@@ -6,9 +6,12 @@ import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import * as express from 'express';
 import * as cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+
 dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
+  app.use(helmet());
   app.useGlobalPipes(customizedValidationPipe);
   app.use(cookieParser());
   const uploadDir = join(process.cwd(), process.env.UPLOAD_DIR);
