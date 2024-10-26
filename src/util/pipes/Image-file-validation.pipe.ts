@@ -4,7 +4,7 @@ import * as sharp from 'sharp';
 @Injectable()
 export class ImageValidationPipe implements PipeTransform {
   async transform(files: Array<Express.Multer.File>) {
-    if (files || files.length !== 0) {
+    if (files && files?.length !== 0) {
       const allowedFormats = ['jpeg', 'png', 'gif'];
       for (const file of files) {
         if (!file.buffer) {

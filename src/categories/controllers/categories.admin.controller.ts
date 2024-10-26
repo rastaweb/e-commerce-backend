@@ -34,23 +34,39 @@ export class CategoriesAdminController {
             fileFilter
         })
     )
-
     create(
         @Body() createCategoryDto: CreateCategoryDto,
         @UploadedFiles(ImageValidationPipe) files: Array<Express.Multer.File>,
     ) {
-        const thumbnail = files.find(file => file.fieldname === 'thumbnail');
-        const icon = files.find(file => file.fieldname === 'icon');
+        let thumbnail: Express.Multer.File
+        let icon: Express.Multer.File
+        if (files) {
+            thumbnail = files.find(file => file.fieldname === 'thumbnail');
+            icon = files.find(file => file.fieldname === 'icon');
+        }
         return this.categoriesAdminService.create(createCategoryDto, thumbnail, icon)
     }
 
     @UseGuards(AuthGuardIsAdmin)
     @Patch(':id')
+    @UseInterceptors(
+        AnyFilesInterceptor({
+            storage: memoryStorage(),
+            fileFilter
+        })
+    )
     update(
         @Param('id', new CustomParseIntPipe({ key: 'id', })) id: number,
-        @Body() updateCategoryDto: UpdateCategoryDto
+        @Body() updateCategoryDto: UpdateCategoryDto,
+        @UploadedFiles(ImageValidationPipe) files: Array<Express.Multer.File>,
     ) {
-        return this.categoriesAdminService.update(id, updateCategoryDto)
+        let thumbnail: Express.Multer.File
+        let icon: Express.Multer.File
+        if (files) {
+            thumbnail = files.find(file => file.fieldname === 'thumbnail');
+            icon = files.find(file => file.fieldname === 'icon');
+        }
+        return this.categoriesAdminService.update(id, updateCategoryDto, thumbnail, icon)
     }
 
 

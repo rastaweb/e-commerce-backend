@@ -42,23 +42,39 @@ export class CategoriesAdminService {
         return category
     }
 
-    async update(id: number, updatecategoryDto: UpdateCategoryDto) {
+    async update(id: number, updatecategoryDto: UpdateCategoryDto, thumbnail?: Express.Multer.File, icon?: Express.Multer.File) {
         const category = await this.findOneById(id)
+        const requestUploadThumbnail = uploadFile(thumbnail, false)
+        const requestUploadIcon = uploadFile(icon, false)
+        console.log(updatecategoryDto);
 
-        if (!updatecategoryDto.name && !updatecategoryDto.description) throw new BadRequestException("دیتایی جهت ویرایش وجود ندارد.")
+        if (!updatecategoryDto.name && !updatecategoryDto.description && !thumbnail && !icon) throw new BadRequestException("داده ای جهت ویرایش وجود ندارد.")
 
         if (updatecategoryDto.name === category.name) throw new ConflictException(`نام دسته بندی و نام جدید جهت ویرایش یکسان است!`);
+        if (updatecategoryDto.name) {
+            const findedByName = await this.categoriesRepository.findOneBy({ name: updatecategoryDto.name })
+            if (findedByName) throw new ConflictException(`دسته بندی با نام [${updatecategoryDto.name}] قبلا ثبت شده است!`);
+        }
 
-        const findedByName = await this.categoriesRepository.findOneBy({ name: updatecategoryDto.name })
+        const mixedData = {
+            ...updatecategoryDto,
+        }
 
-        if (findedByName) throw new ConflictException(`دسته بندی با نام [${updatecategoryDto.name}] قبلا ثبت شده است!`);
+        if (thumbnail) {
+            requestUploadThumbnail.upload()
+            mixedData['thumbnail'] = requestUploadThumbnail?.fileName
+        }
 
-        const updateResult = await this.categoriesRepository.update(id, updatecategoryDto)
+        if (icon) {
+            requestUploadIcon.upload()
+            mixedData['icon'] = requestUploadIcon?.fileName
+        }
+
+        const updateResult = await this.categoriesRepository.update(id, mixedData)
 
         if (updateResult.affected === 0) {
             throw new NotFoundException('خطا در اعمال ویرایش!');
         }
-
         return await this.findOneById(id)
     }
 
@@ -72,5 +88,4 @@ export class CategoriesAdminService {
         return categoryEntities;
     }
 }
-
 
