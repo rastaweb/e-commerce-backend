@@ -7,7 +7,7 @@ import { UpdateCategoryDto } from '../dto/update.category.dto';
 import { CustomParseIntPipe } from 'src/util/pipes/custom-parseInt.pipe';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { ImageValidationPipe } from 'src/util/interceptors/ImageFileInterceptor.interceptor';
+import { ImageValidationPipe } from 'src/util/pipes/Image-file-validation.pipe';
 
 const fileFilter = (req, file, cb) => {
     const allowedMimeTypes = ['image/jpeg', 'image/png'];
