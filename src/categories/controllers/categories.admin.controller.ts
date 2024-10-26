@@ -1,10 +1,22 @@
-import { Body, Controller, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Param, Patch, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CategoriesService } from '../services/categories.service';
 import { AuthGuardIsAdmin } from 'src/auth/guards/auth.isAdmin.guard';
 import { CategoriesAdminService } from '../services/categories.admin.service';
 import { CreateCategoryDto } from '../dto/create.category.dto';
 import { UpdateCategoryDto } from '../dto/update.category.dto';
 import { CustomParseIntPipe } from 'src/util/pipes/custom-parseInt.pipe';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+import { ImageValidationPipe } from 'src/util/interceptors/ImageFileInterceptor.interceptor';
+
+const fileFilter = (req, file, cb) => {
+    const allowedMimeTypes = ['image/jpeg', 'image/png'];
+    if (allowedMimeTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new BadRequestException(`فرمت های مجاز `), false);
+    }
+}
 
 @Controller('/api/admin/categories')
 export class CategoriesAdminController {
@@ -16,10 +28,20 @@ export class CategoriesAdminController {
 
     @UseGuards(AuthGuardIsAdmin)
     @Post()
+    @UseInterceptors(
+        AnyFilesInterceptor({
+            storage: memoryStorage(),
+            fileFilter
+        })
+    )
+
     create(
-        @Body() createCategoryDto: CreateCategoryDto
+        @Body() createCategoryDto: CreateCategoryDto,
+        @UploadedFiles(ImageValidationPipe) files: Array<Express.Multer.File>,
     ) {
-        return this.categoriesAdminService.create(createCategoryDto)
+        const thumbnail = files.find(file => file.fieldname === 'thumbnail');
+        const icon = files.find(file => file.fieldname === 'icon');
+        return this.categoriesAdminService.create(createCategoryDto, thumbnail, icon)
     }
 
     @UseGuards(AuthGuardIsAdmin)

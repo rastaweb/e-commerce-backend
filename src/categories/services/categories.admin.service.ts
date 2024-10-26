@@ -4,6 +4,7 @@ import { Category } from '../entities/category.entity';
 import { Repository } from 'typeorm';
 import { CreateCategoryDto } from '../dto/create.category.dto';
 import { UpdateCategoryDto } from '../dto/update.category.dto';
+import { uploadFile } from 'src/util/handlers/uploadFile';
 
 @Injectable()
 export class CategoriesAdminService {
@@ -11,11 +12,25 @@ export class CategoriesAdminService {
         @InjectRepository(Category) private readonly categoriesRepository: Repository<Category>,
     ) { }
 
-    async create(createCategoryDto: CreateCategoryDto) {
+    async create(createCategoryDto: CreateCategoryDto, thumbnail?: Express.Multer.File, icon?: Express.Multer.File) {
+        const requestUploadThumbnail = uploadFile(thumbnail, false)
+        const requestUploadIcon = uploadFile(icon, false)
+
         const findedCategory = await this.categoriesRepository.findOne({ where: { name: createCategoryDto.name } })
         if (findedCategory) throw new ConflictException(`دسته بندی با نام [${createCategoryDto.name}] قبلا ثبت شده است!`);
-        const newCategory = this.categoriesRepository.create(createCategoryDto);
+        const mixedData: Category = {
+            ...createCategoryDto,
+            thumbnail: requestUploadThumbnail?.fileName,
+            icon: requestUploadIcon?.fileName
+        }
+        const newCategory = this.categoriesRepository.create(mixedData);
         await this.categoriesRepository.save(newCategory);
+        if (thumbnail) {
+            requestUploadThumbnail.upload()
+        }
+        if (icon) {
+            requestUploadIcon.upload()
+        }
         return newCategory;
     }
 
@@ -47,16 +62,13 @@ export class CategoriesAdminService {
         return await this.findOneById(id)
     }
 
-
     async validateCategories(categoryIds: number[]): Promise<Category[]> {
         const categoryEntities = await this.categoriesRepository.findByIds(categoryIds);
         const foundCategoryIds = categoryEntities.map(category => category.id);
-
         const notFoundIds = categoryIds.filter(id => !foundCategoryIds.includes(id));
         if (notFoundIds.length > 0) {
             throw new NotFoundException(`دسته‌بندی‌های زیر یافت نشدند: ${notFoundIds.join(', ')}`);
         }
-
         return categoryEntities;
     }
 }

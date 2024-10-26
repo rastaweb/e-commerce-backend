@@ -4,7 +4,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
 @Entity('categories')
 export class Category {
     @PrimaryGeneratedColumn()
-    id: number;
+    id?: number;
 
     @Column({ type: 'varchar', unique: true })
     name: string;
@@ -13,8 +13,11 @@ export class Category {
     description: string;
 
     @Column({ type: 'text', nullable: true })
-    thumbnail: string;
+    thumbnail?: string;
+    
+    @Column({ type: 'text', nullable: true })
+    icon?: string;
 
     @ManyToMany(() => Product, product => product.categories)
-    products: Product[];
+    products?: Product[];
 }
