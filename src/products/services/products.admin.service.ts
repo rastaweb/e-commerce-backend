@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../entities/product.entity';
 import { Repository } from 'typeorm';
@@ -66,6 +66,17 @@ export class ProductsAdminService {
             throw new NotFoundException("یک یا تعدادی برچسب یاد نشد!")
         }
         product.tags = product.tags.filter(item => !tags.includes(item.id))
+        await this.productsRepository.save(product)
+        return product
+    }
+
+    async addTags(slug: string, tagIds: string) {
+        const product = await this.productsService.findOneBySlug(slug, ['tags'], true)
+        const filtredTagIds = stringToNumberArray(tagIds).filter(id => !product.tags.some(tag => tag.id === id))
+        const duplicateTagIds = stringToNumberArray(tagIds).filter(id => product.tags.some(tag => tag.id === id))
+        if (!filtredTagIds.length) throw new BadRequestException(`برچسب های ${duplicateTagIds} در این محصول موجود هستند!`)
+        const tags = await this.tagsService.findManyById(filtredTagIds)
+        tags.forEach((tag) => product.tags.push(tag))
         await this.productsRepository.save(product)
         return product
     }

@@ -120,4 +120,6 @@ export class ProductsService {
         return product.tags
     }
 
+    
+
 }

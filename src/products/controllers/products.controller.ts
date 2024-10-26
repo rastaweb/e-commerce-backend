@@ -30,8 +30,6 @@ export class ProductsController {
     return this.productsService.findAll(page, limit, filters);
   }
 
-
-  @Get('/id/:id')
   findOneById(
     @Param('id', new CustomParseIntPipe({ key: 'id' })) id: number
   ) {
