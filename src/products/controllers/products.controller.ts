@@ -51,17 +51,19 @@ export class ProductsController {
   }
 
   @Get('similarProducts/tags/:tagIds')
-  similarProductsByTags(
+  findProductsByTags(
     @Param('tagIds') tagIds: string
   ) {
-    return this.productsService.similarProductsByTags(tagIds)
+    return this.productsService.findProductsByTags(tagIds)
   }
 
   @Get('similarProducts/slug/:slug')
   similarProductsBySlug(
-    @Param('slug') slug: string
+    @Query('page', new PaginationValidation({ key: "page", isOptional: true, defaultValue: 1 })) page: number,
+    @Query('limit', new PaginationValidation({ key: "limit", isOptional: true, defaultValue: 10, max: 50 })) limit: number,
+    @Param('slug') slug: string,
   ) {
-    return this.productsService.similarProductsByProductSlug(slug)
+    return this.productsService.similarProductsByProductSlug(slug, page, limit)
   }
 
 

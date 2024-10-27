@@ -120,7 +120,7 @@ export class ProductsService {
         return product.tags
     }
 
-    async similarProductsByTags(tagIds: string) {
+    async findProductsByTags(tagIds: string) {
         const tags = stringToNumberArray(tagIds);
         return this.productsRepository
             .createQueryBuilder('product')
@@ -131,21 +131,50 @@ export class ProductsService {
             .orderBy('tagCount', 'DESC')
             .getMany();
     }
-    async similarProductsByProductSlug(slug: string) {
-        const product = await this.productsRepository.findOne({ where: { slug }, relations: ['tags'] });
+
+    async similarProductsByProductSlug(slug: string, page: number, limit: number) {
+        const product = await this.findOneBySlug(slug, ['tags'], false)
+
+        if (!product) {
+            return {
+                data: [],
+                total: 0,
+                page,
+                limit,
+                totalPages: 0,
+                nextPage: null,
+                prevPage: null,
+            };
+        }
+
         const tags = product.tags.map(tag => tag.id);
-        return this.productsRepository
+        const [similarProducts, total] = await this.productsRepository
             .createQueryBuilder('product')
             .innerJoin('product.tags', 'tag')
             .where('tag.id IN (:...tags) AND product.id <> :productId', { tags, productId: product.id })
             .groupBy('product.id')
             .addSelect('COUNT(DISTINCT tag.id)', 'tagCount')
             .orderBy('tagCount', 'DESC')
-            .getMany();
+            .skip((page - 1) * limit)
+            .take(limit)
+            .getManyAndCount();
+
+        const totalPages = Math.ceil(total / limit);
+        const next = Number(page) + 1;
+        let prev = Number(page) - 1;
+
+        if (prev > totalPages) prev = totalPages;
+
+        return {
+            data: similarProducts,
+            total,
+            page,
+            limit,
+            totalPages,
+            nextPage: page < totalPages ? `${next}` : null,
+            prevPage: page > 1 ? `${prev}` : null,
+        };
     }
-
-
-
 
 
 
