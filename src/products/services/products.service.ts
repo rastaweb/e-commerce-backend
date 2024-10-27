@@ -131,23 +131,19 @@ export class ProductsService {
             .orderBy('tagCount', 'DESC')
             .getMany();
     }
-
     async similarProductsByProductSlug(slug: string) {
-        const product = await this.productsRepository.findOne({ where: { slug }, relations: ['tags'] })
-        const tags = product.tags.map(tag => tag.id)
-
-        console.log(tags);
-        
-
+        const product = await this.productsRepository.findOne({ where: { slug }, relations: ['tags'] });
+        const tags = product.tags.map(tag => tag.id);
         return this.productsRepository
             .createQueryBuilder('product')
             .innerJoin('product.tags', 'tag')
-            .where('tag.id IN (:...tags)', { tags })
+            .where('tag.id IN (:...tags) AND product.id <> :productId', { tags, productId: product.id })
             .groupBy('product.id')
             .addSelect('COUNT(DISTINCT tag.id)', 'tagCount')
             .orderBy('tagCount', 'DESC')
             .getMany();
     }
+
 
 
 
