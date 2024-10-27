@@ -5,7 +5,7 @@ import { LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm'
 import { sortEnum } from 'src/util/enums/sort.enum';
 import { ProductFiltersTypes, ProductQueryOptions } from 'src/util/filters/profucts/filter.types';
 import { TagsService } from 'src/tags/services/tags.service';
-
+import { stringToNumberArray } from 'src/util/converters/stringToNumberArray';
 
 @Injectable()
 export class ProductsService {
@@ -120,6 +120,37 @@ export class ProductsService {
         return product.tags
     }
 
-    
+    async similarProductsByTags(tagIds: string) {
+        const tags = stringToNumberArray(tagIds);
+        return this.productsRepository
+            .createQueryBuilder('product')
+            .innerJoin('product.tags', 'tag')
+            .where('tag.id IN (:...tags)', { tags })
+            .groupBy('product.id')
+            .addSelect('COUNT(DISTINCT tag.id)', 'tagCount')
+            .orderBy('tagCount', 'DESC')
+            .getMany();
+    }
+
+    async similarProductsByProductSlug(slug: string) {
+        const product = await this.productsRepository.findOne({ where: { slug }, relations: ['tags'] })
+        const tags = product.tags.map(tag => tag.id)
+
+        console.log(tags);
+        
+
+        return this.productsRepository
+            .createQueryBuilder('product')
+            .innerJoin('product.tags', 'tag')
+            .where('tag.id IN (:...tags)', { tags })
+            .groupBy('product.id')
+            .addSelect('COUNT(DISTINCT tag.id)', 'tagCount')
+            .orderBy('tagCount', 'DESC')
+            .getMany();
+    }
+
+
+
+
 
 }

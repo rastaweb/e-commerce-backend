@@ -30,7 +30,7 @@ export class TagsAdminService {
             .createQueryBuilder()
             .relation(Product, 'tags')
             .of(tags)
-            .remove(tags)
+        .remove(tags)
 
         this.tagsRepository.
             createQueryBuilder()

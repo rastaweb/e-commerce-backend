@@ -50,4 +50,19 @@ export class ProductsController {
     return this.productsService.productTags(slug)
   }
 
+  @Get('similarProducts/tags/:tagIds')
+  similarProductsByTags(
+    @Param('tagIds') tagIds: string
+  ) {
+    return this.productsService.similarProductsByTags(tagIds)
+  }
+
+  @Get('similarProducts/slug/:slug')
+  similarProductsBySlug(
+    @Param('slug') slug: string
+  ) {
+    return this.productsService.similarProductsByProductSlug(slug)
+  }
+
+
 }

@@ -31,8 +31,8 @@ export class TagsService {
         };
     }
 
-    async findManyById(ids: Array<number>) {
-        const tags = await this.tagsRepository.find({ where: { id: In(ids) } })
+    async findManyById(ids: Array<number>, relations: Array<string> = []) {
+        const tags = await this.tagsRepository.find({ where: { id: In(ids) }, relations })
         if (!tags.length) throw new NotFoundException('برچسب های وارد شده یافت نشدند!')
         return tags
     }
@@ -42,9 +42,11 @@ export class TagsService {
         if (!tag) throw new NotFoundException('برچسب مورد نظر یافت نشد!')
         return tag
     }
+
     async findOneByName(name: string, error: boolean = true) {
         const tag = await this.tagsRepository.findOneBy({ name })
         if (error && !tag) throw new NotFoundException('برچسب مورد نظر یافت نشد!')
         return tag
     }
+
 }
