@@ -14,10 +14,12 @@ export class Category {
 
     @Column({ type: 'text', nullable: true })
     thumbnail?: string;
-    
+
     @Column({ type: 'text', nullable: true })
     icon?: string;
 
     @ManyToMany(() => Product, product => product.categories)
     products?: Product[];
+
+    //TODO: gender
 }

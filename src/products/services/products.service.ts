@@ -1,11 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../entities/product.entity';
-import { LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { sortEnum } from 'src/util/enums/sort.enum';
-import { ProductFiltersTypes, ProductQueryOptions } from 'src/util/filters/profucts/filter.types';
+import { ProductFiltersTypes } from 'src/util/filters/profucts/filter.types';
 import { TagsService } from 'src/tags/services/tags.service';
-import { stringToNumberArray } from 'src/util/converters/stringToNumberArray';
 
 @Injectable()
 export class ProductsService {
@@ -19,48 +18,41 @@ export class ProductsService {
         limit: number,
         filters?: ProductFiltersTypes
     ) {
-        const queryOptions: ProductQueryOptions = {};
+        const queryBuilder = this.productsRepository.createQueryBuilder('product');
 
-        if (filters?.minPrice !== undefined) {
-            queryOptions.final_price = MoreThanOrEqual(filters.minPrice);
+        if (filters?.minPrice) {
+            queryBuilder.andWhere('product.final_price >= :minPrice', { minPrice: filters.minPrice });
+        }
+        if (filters?.maxPrice) {
+            queryBuilder.andWhere('product.final_price <= :maxPrice', { maxPrice: filters.maxPrice });
         }
 
-        if (filters?.maxPrice !== undefined) {
-            queryOptions.final_price = {
-                ...queryOptions.final_price,
-                ...LessThanOrEqual(filters.maxPrice)
-            };
+        if (filters?.isAvailable === true) {
+            queryBuilder.andWhere('product.quantity >= :quantity', { quantity: 1 });
+        }
+        if (filters?.isAvailable === false) {
+            queryBuilder.andWhere('product.quantity = :quantity', { quantity: 0 });
         }
 
-        const priceFilters: any = {};
-        if (filters?.minPrice !== undefined) {
-            priceFilters.final_price = MoreThanOrEqual(filters.minPrice);
+        if (filters?.hasDiscount === true) {
+            queryBuilder.andWhere('product.discount > :discount', { discount: 0 });
         }
 
-        if (filters?.maxPrice !== undefined) {
-            priceFilters.final_price = LessThanOrEqual(filters.maxPrice);
+        if (filters?.hasDiscount === false) {
+            queryBuilder.andWhere('product.discount = :discount', { discount: 0 });
         }
 
-        if (filters?.isAvailable !== undefined) {
-            queryOptions.quantity = filters.isAvailable ? MoreThanOrEqual(1) : 0;
+        if (filters?.tags && filters.tags.length > 0) {
+            queryBuilder
+                .innerJoin('product.tags', 'tag')
+                .where('tag.id IN (:...tags)', { tags: filters.tags });
         }
 
-        if (filters?.hasDiscount !== undefined) {
-            queryOptions.discount = filters.hasDiscount ? MoreThan(0) : 0;
-        }
-
-        if (Object.keys(priceFilters).length) {
-            queryOptions.final_price = priceFilters.final_price;
-        }
-
-        const queryOptionsLength: number = Object.keys(queryOptions).length;
-
-        const [products, total] = await this.productsRepository.findAndCount({
-            where: queryOptionsLength ? queryOptions : undefined,
-            skip: (page - 1) * limit,
-            take: limit,
-            order: { id: filters.sort ? sortEnum[filters.sort] || 'DESC' : 'DESC' },
-        });
+        const [products, total] = await queryBuilder
+            .skip((page - 1) * limit)
+            .take(limit)
+            .orderBy('product.id', filters.sort ? sortEnum[filters.sort] || 'DESC' : 'DESC')
+            .getManyAndCount();
 
         const totalPages = Math.ceil(total / limit);
         const next = Number(page) + 1;
@@ -78,6 +70,7 @@ export class ProductsService {
             prevPage: page > 1 ? `${prev}` : null,
         };
     }
+
 
     async findOneById(id: number) {
         const product = await this.productsRepository.findOne({ where: { id }, relations: { categories: true } })
@@ -120,22 +113,9 @@ export class ProductsService {
         return product.tags
     }
 
-    async findProductsByTags(tagIds: string) {
-        const tags = stringToNumberArray(tagIds);
-        return this.productsRepository
-            .createQueryBuilder('product')
-            .innerJoin('product.tags', 'tag')
-            .where('tag.id IN (:...tags)', { tags })
-            .groupBy('product.id')
-            .addSelect('COUNT(DISTINCT tag.id)', 'tagCount')
-            .orderBy('tagCount', 'DESC')
-            .getMany();
-    }
-
     async similarProductsByProductSlug(slug: string, page: number, limit: number) {
-        const product = await this.findOneBySlug(slug, ['tags'], false)
-
-        if (!product) {
+        const product = await this.findOneBySlug(slug, ['tags'])
+        if (!product.tags.length) {
             return {
                 data: [],
                 total: 0,
@@ -164,6 +144,7 @@ export class ProductsService {
         let prev = Number(page) - 1;
 
         if (prev > totalPages) prev = totalPages;
+
 
         return {
             data: similarProducts,

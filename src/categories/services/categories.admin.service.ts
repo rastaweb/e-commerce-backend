@@ -46,7 +46,6 @@ export class CategoriesAdminService {
         const category = await this.findOneById(id)
         const requestUploadThumbnail = uploadFile(thumbnail, false)
         const requestUploadIcon = uploadFile(icon, false)
-        console.log(updatecategoryDto);
 
         if (!updatecategoryDto.name && !updatecategoryDto.description && !thumbnail && !icon) throw new BadRequestException("داده ای جهت ویرایش وجود ندارد.")
 
@@ -61,17 +60,21 @@ export class CategoriesAdminService {
         }
 
         if (thumbnail) {
-            requestUploadThumbnail.upload()
             mixedData['thumbnail'] = requestUploadThumbnail?.fileName
         }
 
         if (icon) {
-            requestUploadIcon.upload()
             mixedData['icon'] = requestUploadIcon?.fileName
         }
 
         const updateResult = await this.categoriesRepository.update(id, mixedData)
+        if (thumbnail) {
+            requestUploadThumbnail.upload()
+        }
 
+        if (icon) {
+            requestUploadIcon.upload()
+        }
         if (updateResult.affected === 0) {
             throw new NotFoundException('خطا در اعمال ویرایش!');
         }

@@ -11,7 +11,7 @@ import { Product } from 'src/products/entities/product.entity';
 export class TagsAdminService {
     constructor(
         @InjectRepository(Tag) private readonly tagsRepository: Repository<Tag>,
-        @InjectRepository(Tag) private readonly productsRepository: Repository<Product>,
+        @InjectRepository(Product) private readonly productsRepository: Repository<Product>,
         private readonly tagsService: TagsService,
     ) { }
 
@@ -28,11 +28,12 @@ export class TagsAdminService {
         const tags = stringToNumberArray(tagIds)
         await this.productsRepository
             .createQueryBuilder()
-            .relation(Product, 'tags')
-            .of(tags)
-        .remove(tags)
+            .delete()
+            .from('products_tags_tags') // نام جدول میانه
+            .where('tagsId IN (:...tagIds)', { tagIds:tags }) // شناسه‌های تگ‌هایی که می‌خواهید حذف کنید
+            .execute();
 
-        this.tagsRepository.
+        await this.tagsRepository.
             createQueryBuilder()
             .delete()
             .from(Tag)

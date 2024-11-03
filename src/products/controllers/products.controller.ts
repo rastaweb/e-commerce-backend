@@ -21,12 +21,13 @@ export class ProductsController {
     @Query('isAvailable', new FiltersValidation({ key: "isAvailable", isOptional: true })) isAvailable?: boolean,
     @Query('hasDiscount', new FiltersValidation({ key: "hasDiscount", isOptional: true })) hasDiscount?: boolean,
     @Query('sort') sort?: string,
+    @Query('tags') tags?: string,
   ) {
     if (!sortEnum[sort]) {
       sort = "NEW"
     }
     if (minPrice >= maxPrice) throw new BadRequestException(`!باشد maxPrice نباید بزرگتر یا برابر minPrice مقدار`)
-    const filters: ProductFiltersTypes = { minPrice, maxPrice, isAvailable, hasDiscount, sort };
+    const filters: ProductFiltersTypes = { minPrice, maxPrice, isAvailable, hasDiscount, sort, tags };
     return this.productsService.findAll(page, limit, filters);
   }
 
@@ -50,12 +51,6 @@ export class ProductsController {
     return this.productsService.productTags(slug)
   }
 
-  @Get('similarProducts/tags/:tagIds')
-  findProductsByTags(
-    @Param('tagIds') tagIds: string
-  ) {
-    return this.productsService.findProductsByTags(tagIds)
-  }
 
   @Get('similarProducts/slug/:slug')
   similarProductsBySlug(

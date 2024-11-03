@@ -47,6 +47,7 @@ export class CategoriesAdminController {
         return this.categoriesAdminService.create(createCategoryDto, thumbnail, icon)
     }
 
+
     @UseGuards(AuthGuardIsAdmin)
     @Patch(':id')
     @UseInterceptors(

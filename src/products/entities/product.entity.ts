@@ -43,7 +43,7 @@ export class Product {
     @JoinTable()
     categories: Category[];
 
-    @ManyToMany(() => Tag, (tag) => tag.products)
+    @ManyToMany(() => Tag, (tag) => tag.products,{ cascade: true })
     @JoinTable()
     tags: Tag[];
 

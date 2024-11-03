@@ -3,7 +3,8 @@ export interface ProductFiltersTypes {
     maxPrice?: number;
     isAvailable?: boolean;
     hasDiscount?: boolean;
-    sort?: string
+    sort?: string;
+    tags: string
 }
 
 export interface ProductQueryOptions {
