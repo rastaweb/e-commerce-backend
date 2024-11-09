@@ -21,4 +21,13 @@ export class CategoriesController {
     return this.categoriesService.findOneById(id, page, limit)
   }
 
+  @Get('many/:ids')
+  findManyById(
+    @Param('ids') ids: string,
+    @Query('page', new PaginationValidation({ key: "page", isOptional: true, defaultValue: 1 })) page: number,
+    @Query('limit', new PaginationValidation({ key: "limit", isOptional: true, defaultValue: 10, max: 50 })) limit: number,
+  ) {
+    return this.categoriesService.findManyById(ids, page, limit)
+  }
+
 }

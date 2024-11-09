@@ -22,12 +22,13 @@ export class ProductsController {
     @Query('hasDiscount', new FiltersValidation({ key: "hasDiscount", isOptional: true })) hasDiscount?: boolean,
     @Query('sort') sort?: string,
     @Query('tags') tags?: string,
+    @Query('categories') categories?: string
   ) {
     if (!sortEnum[sort]) {
       sort = "NEW"
     }
     if (minPrice >= maxPrice) throw new BadRequestException(`!باشد maxPrice نباید بزرگتر یا برابر minPrice مقدار`)
-    const filters: ProductFiltersTypes = { minPrice, maxPrice, isAvailable, hasDiscount, sort, tags };
+    const filters: ProductFiltersTypes = { minPrice, maxPrice, isAvailable, hasDiscount, sort, tags, categories };
     return this.productsService.findAll(page, limit, filters);
   }
 

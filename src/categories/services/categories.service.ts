@@ -1,8 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from '../entities/category.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { ProductsService } from 'src/products/services/products.service';
+import { stringToNumberArray } from 'src/util/converters/stringToNumberArray';
+import { Product } from 'src/products/entities/product.entity';
 
 @Injectable()
 export class CategoriesService {
@@ -26,4 +28,31 @@ export class CategoriesService {
             products
         }
     }
+
+
+    async findManyById(ids: string, page: number, limit: number) {
+        const categoryIds = stringToNumberArray(ids)
+
+        const requests = []
+        for (const id of categoryIds) {
+            requests.push(this.findOneById(id, page, limit))
+        }
+        const categories = await Promise.all(requests)
+        const mappedCategories = categories.map(({ products, category }) => {
+            return {
+                category,
+                products: products.data,
+            }
+        })
+
+        const { data, ...pagination } = categories[0].products
+
+        return {
+            data: mappedCategories,
+            ...pagination
+        }
+
+    }
+
+
 }

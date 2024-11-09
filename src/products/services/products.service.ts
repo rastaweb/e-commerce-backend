@@ -4,13 +4,12 @@ import { Product } from '../entities/product.entity';
 import { Repository } from 'typeorm';
 import { sortEnum } from 'src/util/enums/sort.enum';
 import { ProductFiltersTypes } from 'src/util/filters/profucts/filter.types';
-import { TagsService } from 'src/tags/services/tags.service';
+
 
 @Injectable()
 export class ProductsService {
     constructor(
         @InjectRepository(Product) private readonly productsRepository: Repository<Product>,
-        private readonly tagsService: TagsService,
     ) { }
 
     async findAll(
@@ -45,8 +44,15 @@ export class ProductsService {
         if (filters?.tags && filters.tags.length > 0) {
             queryBuilder
                 .innerJoin('product.tags', 'tag')
-                .where('tag.id IN (:...tags)', { tags: filters.tags });
+                .where('tag.id IN (:...tags)', { tags: filters.tags.split(',') });
         }
+        
+        if (filters?.categories && filters.categories.length > 0) {
+            queryBuilder
+                .innerJoin('product.categories', 'category')
+                .where('category.id IN (:...categories)', { categories: filters.categories.split(',') });
+        }
+
 
         const [products, total] = await queryBuilder
             .skip((page - 1) * limit)
@@ -156,6 +162,7 @@ export class ProductsService {
             prevPage: page > 1 ? `${prev}` : null,
         };
     }
+
 
 
 

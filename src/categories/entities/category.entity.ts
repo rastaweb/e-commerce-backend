@@ -18,8 +18,12 @@ export class Category {
     @Column({ type: 'text', nullable: true })
     icon?: string;
 
+    @Column({ type: 'int', default: 0 })
+    show_in_home?: number
+
     @ManyToMany(() => Product, product => product.categories)
     products?: Product[];
+
 
     //TODO: gender
 }

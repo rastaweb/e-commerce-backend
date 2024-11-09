@@ -4,7 +4,8 @@ export interface ProductFiltersTypes {
     isAvailable?: boolean;
     hasDiscount?: boolean;
     sort?: string;
-    tags: string
+    tags: string;
+    categories?: string
 }
 
 export interface ProductQueryOptions {
