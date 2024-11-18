@@ -1,8 +1,10 @@
 import { PartialType } from "@nestjs/mapped-types";
 import { CreateCategoryDto } from "./create.category.dto";
-import { IsOptional, IsString } from "class-validator";
+import { IsNumber, IsOptional, Max, Min, } from "class-validator";
 export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {
-    @IsString({ message: 'نام دسته بندی باید از نوع رشته باشد!' })
+    @IsNumber()
+    @Min(0)
+    @Max(1)
     @IsOptional()
     show_in_home: number
 }

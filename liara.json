@@ -1,0 +1,8 @@
+{
+    "disks": [
+        {
+            "name": "rastaweb-disk",
+            "mountTo": "uploads"
+        }
+    ]
+}

@@ -41,4 +41,8 @@ export class CreateProductDto {
     @IsString({ message: 'مقدار برچسب ها باید از نوع رشته باشد!' })
     tagIds?: string;
 
+    @IsOptional()
+    @IsNumber({ allowInfinity: false, allowNaN: false }, { message: 'مقدار آیدی برند باید از نوع عدد باشد!' })
+    brandId?: number;
+
 }

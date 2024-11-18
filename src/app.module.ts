@@ -9,6 +9,7 @@ import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { GlobalModules } from './config/global-modules.config';
 import { TagsModule } from './tags/tags.module';
+import { BrandsModule } from './brands/brands.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { TagsModule } from './tags/tags.module';
     ProductsModule,
     CategoriesModule,
     TagsModule,
+    BrandsModule,
   ],
   controllers: [],
   providers: [],

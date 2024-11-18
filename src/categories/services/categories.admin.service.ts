@@ -15,13 +15,20 @@ export class CategoriesAdminService {
     async create(createCategoryDto: CreateCategoryDto, thumbnail?: Express.Multer.File, icon?: Express.Multer.File) {
         const requestUploadThumbnail = uploadFile(thumbnail, false)
         const requestUploadIcon = uploadFile(icon, false)
-
         const findedCategory = await this.categoriesRepository.findOne({ where: { name: createCategoryDto.name } })
         if (findedCategory) throw new ConflictException(`دسته بندی با نام [${createCategoryDto.name}] قبلا ثبت شده است!`);
+        let parentCategory: Category | null = null;
+        if (createCategoryDto.parentId) {
+            parentCategory = await this.categoriesRepository.findOne({ where: { id: Number(createCategoryDto.parentId) } });
+            if (!parentCategory) {
+                throw new NotFoundException('دسته بندی والد پیدا نشد!');
+            }
+        }
         const mixedData: Category = {
             ...createCategoryDto,
             thumbnail: requestUploadThumbnail?.fileName,
-            icon: requestUploadIcon?.fileName
+            icon: requestUploadIcon?.fileName,
+            parent: parentCategory,
         }
         const newCategory = this.categoriesRepository.create(mixedData);
         await this.categoriesRepository.save(newCategory);
@@ -31,11 +38,11 @@ export class CategoriesAdminService {
         if (icon) {
             requestUploadIcon.upload()
         }
-        return newCategory;
+        return await this.categoriesRepository.findOne({ where: { id: newCategory.id }, relations: ['parent', 'children', 'children.children'] });
     }
 
     async findOneById(id: number) {
-        const category = await this.categoriesRepository.findOne({ where: { id } });
+        const category = await this.categoriesRepository.findOne({ where: { id }, relations: ['children', 'children.children'] });
         if (!category) {
             throw new NotFoundException('دسته‌بندی مورد نظر یافت نشد.');
         }
@@ -47,7 +54,8 @@ export class CategoriesAdminService {
         const requestUploadThumbnail = uploadFile(thumbnail, false)
         const requestUploadIcon = uploadFile(icon, false)
 
-        if (!updatecategoryDto.name && !updatecategoryDto.description && !thumbnail && !icon) throw new BadRequestException("داده ای جهت ویرایش وجود ندارد.")
+
+        if (!updatecategoryDto.name && !updatecategoryDto.description && !thumbnail && !icon && updatecategoryDto.show_in_home == null) throw new BadRequestException("داده ای جهت ویرایش وجود ندارد.")
 
         if (updatecategoryDto.name === category.name) throw new ConflictException(`نام دسته بندی و نام جدید جهت ویرایش یکسان است!`);
         if (updatecategoryDto.name) {
@@ -55,7 +63,7 @@ export class CategoriesAdminService {
             if (findedByName) throw new ConflictException(`دسته بندی با نام [${updatecategoryDto.name}] قبلا ثبت شده است!`);
         }
 
-        const mixedData = {
+        const mixedData: UpdateCategoryDto = {
             ...updatecategoryDto,
         }
 

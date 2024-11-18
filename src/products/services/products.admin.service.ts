@@ -8,6 +8,8 @@ import { Category } from 'src/categories/entities/category.entity';
 import { TagsService } from 'src/tags/services/tags.service';
 import { stringToNumberArray } from 'src/util/converters/stringToNumberArray';
 import { ProductsService } from './products.service';
+import { BrandsService } from 'src/brands/services/brands.service';
+import { Brand } from 'src/brands/entities/brand.entity';
 
 @Injectable()
 export class ProductsAdminService {
@@ -16,9 +18,10 @@ export class ProductsAdminService {
         private readonly categoriesAdminService: CategoriesAdminService,
         private readonly tagsService: TagsService,
         private readonly productsService: ProductsService,
+        private readonly brandsService: BrandsService,
     ) { }
 
-    async create(createProductDto: CreateProductDto): Promise<Product> {
+    async create(createProductDto: CreateProductDto) {
         const { categories, ...productData } = createProductDto;
         let categoryEntities: Array<Category>
         if (categories) {
@@ -38,6 +41,12 @@ export class ProductsAdminService {
             }
         }
 
+        let brand: Brand
+        if (createProductDto.brandId) {
+            brand = await this.brandsService.findOneById(createProductDto.brandId)
+        }
+
+
         const finalPrice = productData.discount ? productData.price - (productData.price * (productData.discount / 100)) : productData.price;
         const newProduct = this.productsRepository.create({
             ...productData,
@@ -45,7 +54,7 @@ export class ProductsAdminService {
             slug: productData.slug || productData.title.split(' ').filter(item => item).join('-'),
             meta_title: productData.meta_title || productData.title,
             meta_description: productData.meta_description || productData.description || "",
-            final_price: finalPrice
+            brand
         });
 
         if (productData.tagIds && productData.tagIds.length > 0) {
@@ -53,11 +62,12 @@ export class ProductsAdminService {
             newProduct.tags = tags;
         }
 
-        return await this.productsRepository.save(newProduct);
+        return { ...(await this.productsRepository.save(newProduct)), finalPrice };
     }
 
     async removeProductTags(slug: string, tagIds: string) {
         const product = await this.productsService.findOneBySlug(slug, ['tags'])
+        if (product.is_lock) throw new BadRequestException('این محصول قفل شده است!')
         const tags = stringToNumberArray(tagIds)
         if (!product.tags.length) {
             throw new NotFoundException("این محصول برچسبی ندارد!")
@@ -72,6 +82,7 @@ export class ProductsAdminService {
 
     async addTags(slug: string, tagIds: string) {
         const product = await this.productsService.findOneBySlug(slug, ['tags'], true)
+        if (product.is_lock) throw new BadRequestException('این محصول قفل شده است!')
         const filtredTagIds = stringToNumberArray(tagIds).filter(id => !product.tags.some(tag => tag.id === id))
         const duplicateTagIds = stringToNumberArray(tagIds).filter(id => product.tags.some(tag => tag.id === id))
         if (!filtredTagIds.length) throw new BadRequestException(`برچسب های ${duplicateTagIds} در این محصول موجود هستند!`)

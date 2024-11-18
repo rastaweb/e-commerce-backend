@@ -4,7 +4,6 @@ import { Category } from '../entities/category.entity';
 import { In, Repository } from 'typeorm';
 import { ProductsService } from 'src/products/services/products.service';
 import { stringToNumberArray } from 'src/util/converters/stringToNumberArray';
-import { Product } from 'src/products/entities/product.entity';
 
 @Injectable()
 export class CategoriesService {
@@ -14,11 +13,15 @@ export class CategoriesService {
     ) { }
 
     async findAll() {
-        return await this.categoriesRepository.find()
+        const categories = await this.categoriesRepository.find({
+            relations: ['children', 'children.children', 'parent'],
+        });
+        return categories.filter(item => !item.parent);
+
     }
 
     async findOneById(id: number, page: number, limit: number) {
-        const category = await this.categoriesRepository.findOneBy({ id });
+        const category = await this.categoriesRepository.findOne({ where: { id }, relations: ['children', 'parent', 'children.children'] });
         if (!category) {
             throw new NotFoundException('دسته‌بندی مورد نظر یافت نشد.');
         }

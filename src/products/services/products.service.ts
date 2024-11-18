@@ -46,13 +46,15 @@ export class ProductsService {
                 .innerJoin('product.tags', 'tag')
                 .where('tag.id IN (:...tags)', { tags: filters.tags.split(',') });
         }
-        
+
         if (filters?.categories && filters.categories.length > 0) {
             queryBuilder
                 .innerJoin('product.categories', 'category')
                 .where('category.id IN (:...categories)', { categories: filters.categories.split(',') });
         }
 
+        queryBuilder
+            .leftJoinAndSelect('product.brand', 'brand');
 
         const [products, total] = await queryBuilder
             .skip((page - 1) * limit)
@@ -79,39 +81,15 @@ export class ProductsService {
 
 
     async findOneById(id: number) {
-        const product = await this.productsRepository.findOne({ where: { id }, relations: { categories: true } })
+        const product = await this.productsRepository.findOne({ where: { id }, relations: ['categories', 'brand', 'tags'] })
         if (!product) throw new NotFoundException(`محصول با آیدی ${id} یافت نشد!`)
         return product
     }
 
-    async findOneBySlug(slug: string, relations: Array<string> | null = ['categories'], error: boolean = true) {
+    async findOneBySlug(slug: string, relations: Array<string> | null = ['categories', 'brand', 'tags'], error: boolean = true) {
         const product = await this.productsRepository.findOne({ where: { slug }, relations })
         if (error && !product) throw new NotFoundException(`محصول با اسلاگ ${slug} یافت نشد!`)
         return product
-    }
-
-    async findProductsByCategory(categoryId: number, page: number, limit: number) {
-        const [products, total] = await this.productsRepository.findAndCount({
-            where: { categories: { id: categoryId } },
-            skip: (page - 1) * limit,
-            take: limit,
-        });
-
-        const totalPages = Math.ceil(total / limit);
-        const next = Number(page) + 1;
-        let prev = Number(page) - 1;
-
-        if (prev > totalPages) prev = totalPages;
-
-        return {
-            data: products,
-            total,
-            page,
-            limit,
-            totalPages,
-            nextPage: page < totalPages ? `${next}` : null,
-            prevPage: page > 1 ? `${prev}` : null,
-        };
     }
 
     async productTags(slug: string) {
@@ -136,7 +114,9 @@ export class ProductsService {
         const tags = product.tags.map(tag => tag.id);
         const [similarProducts, total] = await this.productsRepository
             .createQueryBuilder('product')
+            .leftJoinAndSelect('product.brand', 'brand')
             .innerJoin('product.tags', 'tag')
+            .innerJoin('product.categories', 'categories')
             .where('tag.id IN (:...tags) AND product.id <> :productId', { tags, productId: product.id })
             .groupBy('product.id')
             .addSelect('COUNT(DISTINCT tag.id)', 'tagCount')
@@ -165,5 +145,32 @@ export class ProductsService {
 
 
 
+
+
+
+    // * Use in categories.service.ts
+    async findProductsByCategory(categoryId: number, page: number, limit: number) {
+        const [products, total] = await this.productsRepository.findAndCount({
+            where: { categories: { id: categoryId } },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+
+        const totalPages = Math.ceil(total / limit);
+        const next = Number(page) + 1;
+        let prev = Number(page) - 1;
+
+        if (prev > totalPages) prev = totalPages;
+
+        return {
+            data: products,
+            total,
+            page,
+            limit,
+            totalPages,
+            nextPage: page < totalPages ? `${next}` : null,
+            prevPage: page > 1 ? `${prev}` : null,
+        };
+    }
 
 }

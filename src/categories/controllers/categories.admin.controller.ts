@@ -67,6 +67,7 @@ export class CategoriesAdminController {
             thumbnail = files.find(file => file.fieldname === 'thumbnail');
             icon = files.find(file => file.fieldname === 'icon');
         }
+        
         return this.categoriesAdminService.update(id, updateCategoryDto, thumbnail, icon)
     }
 

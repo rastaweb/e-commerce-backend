@@ -1,7 +1,7 @@
-
+import { Brand } from 'src/brands/entities/brand.entity';
 import { Category } from 'src/categories/entities/category.entity';
 import { Tag } from 'src/tags/entities/tag.entity';
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity("products")
 export class Product {
@@ -47,6 +47,11 @@ export class Product {
     @JoinTable()
     tags: Tag[];
 
+    @ManyToOne(() => Brand, (brand) => brand.products)
+    brand: Brand
+
+    @Column({ type: "int", default: 0 })
+    is_lock: number
     // TODO => keywords
     // TODO => variants
 }
