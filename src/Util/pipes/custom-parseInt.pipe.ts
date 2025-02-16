@@ -7,6 +7,7 @@ interface Config {
     defaultValue?: any
 }
 
+
 @Injectable()
 export class CustomParseIntPipe implements PipeTransform<string, number> {
     constructor(
