@@ -1,176 +1,195 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Product } from '../entities/product.entity';
-import { Repository } from 'typeorm';
-import { sortEnum } from 'src/util/enums/sort.enum';
-import { ProductFiltersTypes } from 'src/util/filters/profucts/filter.types';
-
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Product } from "../entities/product.entity";
+import { Repository } from "typeorm";
+import { sortEnum } from "src/util/enums/sort.enum";
+import { ProductFiltersTypes } from "src/util/filters/profucts/filter.types";
 
 @Injectable()
 export class ProductsService {
-    constructor(
-        @InjectRepository(Product) private readonly productsRepository: Repository<Product>,
-    ) { }
+	constructor(
+		@InjectRepository(Product)
+		private readonly productsRepository: Repository<Product>,
+	) {}
 
-    async findAll(
-        page: number,
-        limit: number,
-        filters?: ProductFiltersTypes
-    ) {
-        const queryBuilder = this.productsRepository.createQueryBuilder('product');
+	async findAll(page: number, limit: number, filters?: ProductFiltersTypes) {
+		const queryBuilder = this.productsRepository.createQueryBuilder("product");
 
-        if (filters?.minPrice) {
-            queryBuilder.andWhere('product.final_price >= :minPrice', { minPrice: filters.minPrice });
-        }
-        if (filters?.maxPrice) {
-            queryBuilder.andWhere('product.final_price <= :maxPrice', { maxPrice: filters.maxPrice });
-        }
+		if (filters?.minPrice) {
+			queryBuilder.andWhere("product.final_price >= :minPrice", {
+				minPrice: filters.minPrice,
+			});
+		}
+		if (filters?.maxPrice) {
+			queryBuilder.andWhere("product.final_price <= :maxPrice", {
+				maxPrice: filters.maxPrice,
+			});
+		}
 
-        if (filters?.isAvailable === true) {
-            queryBuilder.andWhere('product.quantity >= :quantity', { quantity: 1 });
-        }
-        if (filters?.isAvailable === false) {
-            queryBuilder.andWhere('product.quantity = :quantity', { quantity: 0 });
-        }
+		if (filters?.isAvailable === true) {
+			queryBuilder.andWhere("product.quantity >= :quantity", { quantity: 1 });
+		}
+		if (filters?.isAvailable === false) {
+			queryBuilder.andWhere("product.quantity = :quantity", { quantity: 0 });
+		}
 
-        if (filters?.hasDiscount === true) {
-            queryBuilder.andWhere('product.discount > :discount', { discount: 0 });
-        }
+		if (filters?.hasDiscount === true) {
+			queryBuilder.andWhere("product.discount > :discount", { discount: 0 });
+		}
 
-        if (filters?.hasDiscount === false) {
-            queryBuilder.andWhere('product.discount = :discount', { discount: 0 });
-        }
+		if (filters?.hasDiscount === false) {
+			queryBuilder.andWhere("product.discount = :discount", { discount: 0 });
+		}
 
-        if (filters?.tags && filters.tags.length > 0) {
-            queryBuilder
-                .innerJoin('product.tags', 'tag')
-                .where('tag.id IN (:...tags)', { tags: filters.tags.split(',') });
-        }
+		if (filters?.tags && filters.tags.length > 0) {
+			queryBuilder
+				.innerJoin("product.tags", "tag")
+				.where("tag.id IN (:...tags)", { tags: filters.tags.split(",") });
+		}
 
-        if (filters?.categories && filters.categories.length > 0) {
-            queryBuilder
-                .innerJoin('product.categories', 'category')
-                .where('category.id IN (:...categories)', { categories: filters.categories.split(',') });
-        }
+		if (filters?.categories && filters.categories.length > 0) {
+			queryBuilder
+				.innerJoin("product.categories", "category")
+				.where("category.id IN (:...categories)", {
+					categories: filters.categories.split(","),
+				});
+		}
 
-        queryBuilder
-            .leftJoinAndSelect('product.brand', 'brand');
+		queryBuilder.leftJoinAndSelect("product.brand", "brand");
+		queryBuilder.leftJoinAndSelect("product.categories", "categories");
 
-        const [products, total] = await queryBuilder
-            .skip((page - 1) * limit)
-            .take(limit)
-            .orderBy('product.id', filters.sort ? sortEnum[filters.sort] || 'DESC' : 'DESC')
-            .getManyAndCount();
+		const [products, total] = await queryBuilder
+			.skip((page - 1) * limit)
+			.take(limit)
+			.orderBy(
+				"product.id",
+				filters.sort ? sortEnum[filters.sort] || "DESC" : "DESC",
+			)
+			.getManyAndCount();
 
-        const totalPages = Math.ceil(total / limit);
-        const next = Number(page) + 1;
-        let prev = Number(page) - 1;
+		const totalPages = Math.ceil(total / limit);
+		const next = Number(page) + 1;
+		let prev = Number(page) - 1;
 
-        if (prev > totalPages) prev = totalPages;
+		if (prev > totalPages) prev = totalPages;
 
-        return {
-            data: products,
-            total,
-            page,
-            limit,
-            totalPages,
-            nextPage: page < totalPages ? `${next}` : null,
-            prevPage: page > 1 ? `${prev}` : null,
-        };
-    }
+		return {
+			data: products,
+			total,
+			page,
+			limit,
+			totalPages,
+			nextPage: page < totalPages ? `${next}` : null,
+			prevPage: page > 1 ? `${prev}` : null,
+		};
+	}
 
+	async findOneById(id: number) {
+		const product = await this.productsRepository.findOne({
+			where: { id },
+			relations: ["categories", "brand", "tags"],
+		});
+		if (!product) throw new NotFoundException(`محصول با آیدی ${id} یافت نشد!`);
+		return product;
+	}
 
-    async findOneById(id: number) {
-        const product = await this.productsRepository.findOne({ where: { id }, relations: ['categories', 'brand', 'tags'] })
-        if (!product) throw new NotFoundException(`محصول با آیدی ${id} یافت نشد!`)
-        return product
-    }
+	async findOneBySlug(
+		slug: string,
+		relations: Array<string> | null = ["categories", "brand", "tags"],
+		error: boolean = true,
+	) {
+		const product = await this.productsRepository.findOne({
+			where: { slug },
+			relations,
+		});
+		if (error && !product)
+			throw new NotFoundException(`محصول با اسلاگ ${slug} یافت نشد!`);
+		return product;
+	}
 
-    async findOneBySlug(slug: string, relations: Array<string> | null = ['categories', 'brand', 'tags'], error: boolean = true) {
-        const product = await this.productsRepository.findOne({ where: { slug }, relations })
-        if (error && !product) throw new NotFoundException(`محصول با اسلاگ ${slug} یافت نشد!`)
-        return product
-    }
+	async productTags(slug: string) {
+		const product = await this.findOneBySlug(slug, ["tags"]);
+		return product.tags;
+	}
 
-    async productTags(slug: string) {
-        const product = await this.findOneBySlug(slug, ['tags'])
-        return product.tags
-    }
+	async similarProductsByProductSlug(
+		slug: string,
+		page: number,
+		limit: number,
+	) {
+		const product = await this.findOneBySlug(slug, ["tags"]);
+		if (!product.tags.length) {
+			return {
+				data: [],
+				total: 0,
+				page,
+				limit,
+				totalPages: 0,
+				nextPage: null,
+				prevPage: null,
+			};
+		}
 
-    async similarProductsByProductSlug(slug: string, page: number, limit: number) {
-        const product = await this.findOneBySlug(slug, ['tags'])
-        if (!product.tags.length) {
-            return {
-                data: [],
-                total: 0,
-                page,
-                limit,
-                totalPages: 0,
-                nextPage: null,
-                prevPage: null,
-            };
-        }
+		const tags = product.tags.map((tag) => tag.id);
+		const [similarProducts, total] = await this.productsRepository
+			.createQueryBuilder("product")
+			.leftJoinAndSelect("product.brand", "brand")
+			.innerJoin("product.tags", "tag")
+			.innerJoin("product.categories", "categories")
+			.where("tag.id IN (:...tags) AND product.id <> :productId", {
+				tags,
+				productId: product.id,
+			})
+			.groupBy("product.id")
+			.addSelect("COUNT(DISTINCT tag.id)", "tagCount")
+			.orderBy("tagCount", "DESC")
+			.skip((page - 1) * limit)
+			.take(limit)
+			.getManyAndCount();
 
-        const tags = product.tags.map(tag => tag.id);
-        const [similarProducts, total] = await this.productsRepository
-            .createQueryBuilder('product')
-            .leftJoinAndSelect('product.brand', 'brand')
-            .innerJoin('product.tags', 'tag')
-            .innerJoin('product.categories', 'categories')
-            .where('tag.id IN (:...tags) AND product.id <> :productId', { tags, productId: product.id })
-            .groupBy('product.id')
-            .addSelect('COUNT(DISTINCT tag.id)', 'tagCount')
-            .orderBy('tagCount', 'DESC')
-            .skip((page - 1) * limit)
-            .take(limit)
-            .getManyAndCount();
+		const totalPages = Math.ceil(total / limit);
+		const next = Number(page) + 1;
+		let prev = Number(page) - 1;
 
-        const totalPages = Math.ceil(total / limit);
-        const next = Number(page) + 1;
-        let prev = Number(page) - 1;
+		if (prev > totalPages) prev = totalPages;
 
-        if (prev > totalPages) prev = totalPages;
+		return {
+			data: similarProducts,
+			total,
+			page,
+			limit,
+			totalPages,
+			nextPage: page < totalPages ? `${next}` : null,
+			prevPage: page > 1 ? `${prev}` : null,
+		};
+	}
 
+	// * Use in categories.service.ts
+	async findProductsByCategory(
+		categoryId: number,
+		page: number,
+		limit: number,
+	) {
+		const [products, total] = await this.productsRepository.findAndCount({
+			where: { categories: { id: categoryId } },
+			skip: (page - 1) * limit,
+			take: limit,
+		});
 
-        return {
-            data: similarProducts,
-            total,
-            page,
-            limit,
-            totalPages,
-            nextPage: page < totalPages ? `${next}` : null,
-            prevPage: page > 1 ? `${prev}` : null,
-        };
-    }
+		const totalPages = Math.ceil(total / limit);
+		const next = Number(page) + 1;
+		let prev = Number(page) - 1;
 
+		if (prev > totalPages) prev = totalPages;
 
-
-
-
-
-    // * Use in categories.service.ts
-    async findProductsByCategory(categoryId: number, page: number, limit: number) {
-        const [products, total] = await this.productsRepository.findAndCount({
-            where: { categories: { id: categoryId } },
-            skip: (page - 1) * limit,
-            take: limit,
-        });
-
-        const totalPages = Math.ceil(total / limit);
-        const next = Number(page) + 1;
-        let prev = Number(page) - 1;
-
-        if (prev > totalPages) prev = totalPages;
-
-        return {
-            data: products,
-            total,
-            page,
-            limit,
-            totalPages,
-            nextPage: page < totalPages ? `${next}` : null,
-            prevPage: page > 1 ? `${prev}` : null,
-        };
-    }
-
+		return {
+			data: products,
+			total,
+			page,
+			limit,
+			totalPages,
+			nextPage: page < totalPages ? `${next}` : null,
+			prevPage: page > 1 ? `${prev}` : null,
+		};
+	}
 }
