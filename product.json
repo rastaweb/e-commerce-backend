@@ -1,0 +1,35 @@
+{
+    "id": 1,
+    "title": "T-Shirt",
+    "description": "A stylish t-shirt.",
+    "base_price": null,
+    "images": [],
+    "colors": [
+      {
+        "id": 1,
+        "color": "Red",
+        "images": [
+          { "id": 1, "url": "https://example.com/red-front.jpg" },
+          { "id": 2, "url": "https://example.com/red-back.jpg" }
+        ],
+        "variants": [
+          { "id": 1, "size": "M", "price": 100000, "stock": 20 },
+          { "id": 2, "size": "L", "price": 120000, "stock": 10 }
+        ]
+      },
+      {
+        "id": 2,
+        "color": "Blue",
+        "images": [
+          { "id": 3, "url": "https://example.com/blue-front.jpg" }
+        ],
+        "variants": [
+          { "id": 3, "size": "M", "price": 110000, "stock": 15 }
+        ]
+      }
+    ],
+    "variants": [
+        { "id": 2, "size": "L", "price": 120000, "stock": 10 }
+    ]
+  }
+  

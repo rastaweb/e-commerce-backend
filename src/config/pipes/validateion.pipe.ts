@@ -8,6 +8,7 @@ export const customizedValidationPipe = new ValidationPipe({
             return item.constraints && item.constraints['whitelistValidation'];
         });
         if (whiteListError) {
+            console.log( whiteListError)
             return new BadRequestException('اطلاعات ارسالی غیرمجاز است. لطفاً فقط فیلدهای معتبر را ارسال کنید.');
         }
         const formattedErrors = errors.reduce((acc, err) => {
