@@ -32,3 +32,4 @@ export class CustomParseIntPipe implements PipeTransform<string, number> {
         return val;
     }
 }
+
